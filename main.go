@@ -1,7 +1,7 @@
 package main
 
 import (
-	controllerLivros "projeto404/src/Api/Controllers/ControllerLivros"
+	controllerProdutos "projeto404/src/Api/Controllers/ControllerProdutos"
 	controllerUsuarios "projeto404/src/Api/Controllers/ControllerUsuarios"
 
 	"log"
@@ -24,13 +24,12 @@ func main() {
 		api.PUT("/usuario/:id", controllerUsuarios.AtualizarUsuarios)
 		api.DELETE("/usuario/:id", controllerUsuarios.DeletarUsuarios)
 
-		// Livros
-		api.GET("/livros", controllerLivros.ListarLivro)
-		api.GET("/livros/:id", controllerLivros.ListarLivro)
-		api.POST("/livros/", controllerLivros.CriarLivro)
-		api.PUT("/livros/:id", controllerLivros.AtualizarLivro)
-		api.DELETE("/livros/:id", controllerLivros.DeletarLivro)
-
+		// Produtos
+		api.GET("/produtos", controllerProdutos.ListarProduto)
+		api.GET("/produtos/:id", controllerProdutos.ListarProduto)
+		api.POST("/produtos/", controllerProdutos.CriarProduto)
+		api.PUT("/produtos/:id", controllerProdutos.AtualizarProduto)
+		api.DELETE("/produtos/:id", controllerProdutos.DeletarProduto)
 	}
 
 	log.Println("Server started on port 8080")

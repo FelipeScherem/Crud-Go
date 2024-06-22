@@ -2,17 +2,24 @@ package util
 
 import (
 	"fmt"
-	"log"
-	"os"
-
+	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"log"
+	"os"
 )
 
 var db *gorm.DB
 
 // ConnectDB cria e retorna uma conexão com o banco de dados PostgreSQL usando o GORM
 func ConectaDB() *gorm.DB {
+
+	// Carrega as variáveis de ambiente do arquivo .env
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Erro ao carregar arquivo .env: %v", err)
+	}
+
 	// Busca as infos do banco no .ENV
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
