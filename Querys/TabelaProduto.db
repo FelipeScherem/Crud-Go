@@ -1,0 +1,17 @@
+CREATE TABLE produtos (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    descricao TEXT,
+    preco NUMERIC(10, 2) NOT NULL,
+    desconto JSONB,
+    estoque INTEGER NOT NULL,
+    disponivel BOOLEAN NOT NULL,
+    categorias JSONB NOT NULL,
+    imagens JSONB,
+    dimensoes JSONB NOT NULL,
+    cor JSONB NOT NULL,
+	numero_de_vendas INTEGER,
+    data_criacao TIMESTAMP,
+    data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_softdelete TIMESTAMP
+);

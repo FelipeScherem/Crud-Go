@@ -1,0 +1,11 @@
+CREATE TABLE pedidos (
+    id SERIAL PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    data_pedido TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(50) NOT NULL,
+    total NUMERIC(10, 2) NOT NULL,
+    endereco_entrega VARCHAR(255) NOT NULL,
+    forma_pagamento JSONB NOT NULL,
+    data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_usuario FOREIGN KEY(usuario_id) REFERENCES usuarios(id)
+);
