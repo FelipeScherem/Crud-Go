@@ -1,0 +1,9 @@
+CREATE TABLE pedido_produtos (
+    pedido_id INT NOT NULL,
+    produto_id INT NOT NULL,
+    quantidade INT NOT NULL,
+    preco_unitario NUMERIC(10, 2) NOT NULL,
+    PRIMARY KEY (pedido_id, produto_id),
+    CONSTRAINT fk_pedido FOREIGN KEY(pedido_id) REFERENCES pedidos(id),
+    CONSTRAINT fk_produto FOREIGN KEY(produto_id) REFERENCES produtos(id)
+);

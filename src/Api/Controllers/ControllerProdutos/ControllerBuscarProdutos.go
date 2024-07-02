@@ -1,4 +1,4 @@
-// Package controllerProdutos proteto400/src/Api/Controllers/ControllerUsuarios/ControllerBuscarProdutos.go
+// Package controllerProdutos projeto404/src/Api/Controllers/ControllerUsuarios/ControllerBuscarProdutos.go
 package controllerProdutos
 
 import (
