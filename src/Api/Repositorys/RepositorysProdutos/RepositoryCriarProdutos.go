@@ -6,11 +6,11 @@ import (
 )
 
 // CriarProduto insere os dados do produto no banco e retorna
-func CriarProduto(structlivro modelProdutos.ProdutoStruct) error {
+func CriarProduto(produto modelProdutos.ProdutoStruct) error {
 	database := db.ConectaDB() // Abre a conexão com o banco de dados
 	defer db.FechaDB(database) // Fecha conexão com o banco de dados no final da função
 
-	query := database.Create(structlivro) // Faz a inserção
+	query := database.Create(&produto) // Faz a inserção
 	// Verifica se houve erro
 	if query.Error != nil {
 		return query.Error

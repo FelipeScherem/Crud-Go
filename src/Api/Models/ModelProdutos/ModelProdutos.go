@@ -1,40 +1,26 @@
+// Package modelProduto projeto404/src/Api/Models/ModelsProdutos/ModelsProdutos.go
 package modelProduto
 
+import (
+	"gorm.io/gorm"
+)
+
 type ProdutoStruct struct {
-	Nome            string     `gorm:"nome"`
-	Descricao       string     `gorm:"descricao"`
-	Preco           float64    `gorm:"preco"`
-	Desconto        []struct{} `gorm:"desconto"`
-	Estoque         int        `gorm:"estoque"`
-	Disponivel      bool       `gorm:"disponivel"`
-	Categorias      []string   `gorm:"categorias"`
-	Imagens         []string   `gorm:"imagens"`
-	Tamanho         []string   `gorm:"tamanho"`
-	Cor             []string   `gorm:"cor"`
-	DataCriacao     string     `gorm:"data_criacao"`
-	DataAtualizacao string     `gorm:"data_atualizacao"`
+	gorm.Model
+	Nome           string  `gorm:"column:nome"`
+	Descricao      string  `gorm:"column:descricao"`
+	Preco          float64 `gorm:"column:preco"`
+	TipoDeDesconto string  `gorm:"column:tipo_de_desconto"`
+	Valor          float64 `gorm:"column:desconto"`
+	Estoque        int     `gorm:"column:estoque"`
+	Disponivel     bool    `gorm:"column:disponivel"`
+	Categorias     string  `gorm:"type:jsonb;column:categorias"`
+	Imagens        string  `gorm:"type:jsonb;column:imagens"`
+	Tamanho        string  `gorm:"type:jsonb;column:tamanho"`
+	Cor            string  `gorm:"type:jsonb;column:cor"`
 }
 
-// Struct para representar uma variante do produto (combinação de tamanho e cor)
-type Desconto struct {
-	TipoDeDesconto string  `gorm:"tipo_de_desconto"`
-	Desconto       float64 `gorm:"desconto"`
+// TableName define o nome da tabela no banco de dados
+func (ProdutoStruct) TableName() string {
+	return "produtos"
 }
-
-
-
-CREATE TABLE produtos (
-	id 					SERIAL PRIMARY KEY,
-	nome				VARCHAR(255),
-	descricao			VARCHAR(255),
-	preco				DATE,
-	desconto			JSON,
-	estoque				BOOLEAN,
-	disponivel			BOOL,
-	categorias			JSON,
-	imagens				JSON,
-	tamanho				JSON,
-	cor					JSON,
-	data_criacao		DATE,
-	data_atualizacao	DATE
-);
