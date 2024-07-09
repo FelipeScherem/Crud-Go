@@ -11,7 +11,7 @@ import (
 
 var db *gorm.DB
 
-// ConnectDB cria e retorna uma conexão com o banco de dados PostgreSQL usando o GORM
+// ConectaDB cria e retorna uma conexão com o banco de dados PostgreSQL usando o GORM
 func ConectaDB() *gorm.DB {
 
 	// Carrega as variáveis de ambiente do arquivo .env

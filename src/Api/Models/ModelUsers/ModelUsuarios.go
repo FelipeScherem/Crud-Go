@@ -1,13 +1,28 @@
 package modelUsuario
 
-import "time"
+import (
+	"gorm.io/gorm"
+	"time"
+)
 
-type Usuario struct {
-	ID       uint   `gorm:"primaryKey" json:"id"`
-	Nome     string `json:"nome"`
-	Email    string `json:"email"`
-	Situacao bool   `json:"situacao"`
+// UsuarioStruct Struct com os dados de usuarios
+type UsuarioStruct struct {
+	gorm.Model
+	Nome                     string    `gorm:"column:nome"`
+	Email                    string    `gorm:"column:email"`
+	Telefone                 int       `gorm:"column:telefone"`
+	Senha                    string    `gorm:"column:senha"`
+	DataDeNascimento         time.Time `gorm:"column:dataDeNascimento"`
+	Foto                     string    `gorm:"column:foto"`
+	CidadeDeAtuacao          string    `gorm:"column:cidadeDeAtuacao"`
+	ServicosPrestados        []string  `gorm:"column:tipoDeServico"`
+	CPF                      string    `gorm:"column:cpf"`
+	CNPJ                     string    `gorm:"column:cnpj"`
+	NomeFantasia             string    `gorm:"column:nomeFantasia"`
+	QuantidadeDeFuncionarios string    `gorm:"column:quantidadeDeFuncionarios"`
+}
 
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+// TableName define o nome da tabela no banco de dados
+func (UsuarioStruct) TableName() string {
+	return "usuarios"
 }
