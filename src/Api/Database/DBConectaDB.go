@@ -1,4 +1,4 @@
-package util
+package Database
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"os"
+	"projeto404/src/Api/Database/Migrations"
 )
 
 var db *gorm.DB
@@ -34,6 +35,14 @@ func ConectaDB() *gorm.DB {
 	database, err := gorm.Open(postgres.Open(connStr), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Erro ao conectar ao banco de dados: %v", err)
+	}
+
+	// Rodar migrations
+	migrations, _ := Migrations.RodarMigrations(database)
+	if err != nil {
+		fmt.Println("Ocorreu um erro ao rodar migrations", err)
+	} else {
+		fmt.Println(migrations)
 	}
 
 	// Retorna a conexão

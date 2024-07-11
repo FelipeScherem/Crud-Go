@@ -4,6 +4,8 @@ import (
 	"net/http"
 	modelUsuario "projeto404/src/Api/Models/ModelUsers"
 	repositoryUsuarios "projeto404/src/Api/Repositorys/RepositorysUsuarios"
+	serviceUsuarios "projeto404/src/Api/Services/ServicesUsuarios"
+	util "projeto404/src/Api/Uteis"
 	"reflect"
 	"strings"
 	"time"
@@ -26,16 +28,40 @@ func CriarUsuarios(c *gin.Context) {
 		return // A resposta JSON de erro já foi enviada pela função
 	}
 
-	// camposDuplicados é uma variavel que agrupa os dados repetidos
-	camposDuplicados, err := repositoryUsuarios.VerificaSeDadosExistem(usuarioRequest.CPF, usuarioRequest.CNPJ, usuarioRequest.Email, usuarioRequest.Telefone)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"mensagem": "Houve um erro ao criar usuário", "erro": err.Error()})
-		return
-	} else if len(camposDuplicados) > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"mensagem": "Campos duplicados encontrados", "campos": camposDuplicados})
+	// ############## VALIDAÇÕES ##############
+	// Chama a função de validações da senha
+	mensagem, statusSenha := util.ValidarSenha(usuarioRequest.Senha)
+	if !statusSenha {
+		c.JSON(http.StatusBadRequest, gin.H{"mensagem": mensagem})
 		return
 	}
 
+	if usuarioRequest.CPF != "" {
+		mensagem, statusCPF := util.ValidarCPF(usuarioRequest.CPF)
+		if !statusCPF {
+			c.JSON(http.StatusBadRequest, gin.H{"mensagem": mensagem})
+			return
+		}
+	}
+
+	if usuarioRequest.CNPJ != "" {
+		mensagem, statusCNPJ := util.ValidarCNPJ(usuarioRequest.CNPJ)
+		if !statusCNPJ {
+			c.JSON(http.StatusBadRequest, gin.H{"mensagem": mensagem})
+			return
+		}
+	}
+	// ############## VALIDAÇÕES ##############
+
+	// Busca dados do CNPJ
+	if usuarioRequest.CNPJ != "" {
+	}
+
+	razaoSocial, nomeFantasia, err, mensagem := serviceUsuarios.ConsultarDadosCNPJ(usuarioRequest.CNPJ)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"mensagem": mensagem, "erro": err})
+		return
+	}
 	// Popula os dados da struct de inserção
 	usuarioModel := modelUsuario.UsuarioStruct{
 		Nome:                     usuarioRequest.Nome,
@@ -44,39 +70,44 @@ func CriarUsuarios(c *gin.Context) {
 		Senha:                    usuarioRequest.Senha,
 		Foto:                     usuarioRequest.Foto,
 		CidadeDeAtuacao:          usuarioRequest.CidadeDeAtuacao,
-		ServicosPrestados:        usuarioRequest.ServicosPrestados,
+		ServicosPrestados:        strings.Join(usuarioRequest.ServicosPrestados, ", "),
 		CPF:                      usuarioRequest.CPF,
 		CNPJ:                     usuarioRequest.CNPJ,
-		NomeFantasia:             usuarioRequest.NomeFantasia,
+		RazaoSocial:              razaoSocial,
+		NomeFantasia:             nomeFantasia,
 		QuantidadeDeFuncionarios: usuarioRequest.QuantidadeDeFuncionarios,
 		DataDeNascimento:         usuarioRequest.DataDeNascimento,
 	}
 
 	// Chama o repository para inserção
-	err = repositoryUsuarios.CriarUsuario(usuarioModel)
+	mensagemDeErro, err := repositoryUsuarios.CriarUsuario(usuarioModel)
 	// Verifica se houve erro
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"mensagem": "Houve um erro ao criar usuario", "error": err})
+	if err != nil && mensagemDeErro != "" {
+		c.JSON(http.StatusBadRequest, gin.H{"mensagem": mensagemDeErro, "error": err})
+		return
 	}
 
 	// Retorna um ok
 	c.JSON(http.StatusOK, gin.H{"mensagem": "Usuário criado com sucesso"})
 }
 
-// Valida se todos os campos foram enviados
+// validaSeCamposVazio verifica se todos os campos foram enviados
 //
 //	True se houver campos vazios
 //	False se estiverem todos preenchidos
 func validaSeCamposVazio(c *gin.Context, usuarioRequest UsuarioRequest) bool {
-	camposVazios := []string{} // Variável para agrupar nome de campos que estão vazios
+	// Variável para agrupar nome de campos que estão vazios
+	var camposVazios []string
 	usuarioRequestReflect := reflect.ValueOf(usuarioRequest)
 
 	// Percorre os campos do struct
 	for i := 0; i < usuarioRequestReflect.NumField(); i++ {
 		valorDoCampo := usuarioRequestReflect.Field(i)
 		nomeDoCampo := usuarioRequestReflect.Type().Field(i).Tag.Get("json")
+
 		if valorDoCampo.Kind() == reflect.String && valorDoCampo.Len() == 0 {
-			if nomeDoCampo != "cpf" && nomeDoCampo != "cnpj" { // Ignorar CPF e CNPJ nesta verificação
+			// Ignorar CPF e CNPJ nesta etapa, pois um deles pode ser vazio quando o outro estiver preenchido
+			if nomeDoCampo != "cpf" && nomeDoCampo != "cnpj" {
 				camposVazios = append(camposVazios, nomeDoCampo)
 			}
 		}
@@ -108,7 +139,6 @@ type UsuarioRequest struct {
 	ServicosPrestados        []string  `json:"tipoDeServico"`
 	CPF                      string    `json:"cpf"`
 	CNPJ                     string    `json:"cnpj"`
-	NomeFantasia             string    `json:"nomeFantasia"`
 	QuantidadeDeFuncionarios string    `json:"quantidadeDeFuncionarios"`
 	DataDeNascimento         time.Time `json:"dataDeNascimento"`
 }

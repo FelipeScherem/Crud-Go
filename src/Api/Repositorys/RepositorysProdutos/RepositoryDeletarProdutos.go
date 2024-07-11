@@ -1,7 +1,7 @@
 package repositorysProdutos
 
 import (
-	db "projeto404/src/Api/Uteis"
+	db "projeto404/src/Api/Database"
 )
 
 // DeletarProduto Faz um Soft-Delete. No banco existe uma rotina onde excluir automaticamente após 30 dias

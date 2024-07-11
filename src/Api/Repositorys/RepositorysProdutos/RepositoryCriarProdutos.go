@@ -1,8 +1,8 @@
 package repositorysProdutos
 
 import (
+	db "projeto404/src/Api/Database"
 	modelProdutos "projeto404/src/Api/Models/ModelProdutos"
-	db "projeto404/src/Api/Uteis"
 )
 
 // CriarProduto insere os dados do produto no banco e retorna

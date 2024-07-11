@@ -7,16 +7,20 @@ import (
 	"strings"
 )
 
-// CriarUsuario insere os dados do cliente no banco
-func CriarUsuario(usuarioStruct modelUsuario.UsuarioStruct) (string, error) {
+// AtualizarUsuario insere os dados do cliente no banco
+func AtualizarUsuario(usuarioStruct modelUsuario.UsuarioStruct, idUsuario int) (string, error) {
 	database := db.ConectaDB() // Abre a conexão com o banco de dados
 	defer db.FechaDB(database) // Fecha conexão com o banco de dados no final da função
 
 	// Tenta fazer a inserção, se houver dados repetidos, ele retorna com os campos repetidos
-	if err := database.Create(&usuarioStruct).Error; err != nil {
-
-		camposRepetidos := "Campos repetidos: "
-		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23505" { // 23505 É o código de erro padrão do postgresql unique_violation
+	result := database.
+		Model(&modelUsuario.UsuarioStruct{}).
+		Where("id = ?", idUsuario).
+		Updates(&usuarioStruct)
+	if err := result.Error; err != nil {
+		// Verifica se houve erro de violação de unicidade (unique_violation)
+		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23505" {
+			camposRepetidos := "Campos repetidos: "
 			if strings.Contains(pgErr.Detail, "email") {
 				camposRepetidos += "email, "
 			}
@@ -29,11 +33,12 @@ func CriarUsuario(usuarioStruct modelUsuario.UsuarioStruct) (string, error) {
 			if strings.Contains(pgErr.Detail, "cnpj") {
 				camposRepetidos += "cnpj, "
 			}
-			// Remova a vírgula extra no final, se houver
-			camposRepetidos = camposRepetidos[:len(camposRepetidos)-2]
+			// Remove a vírgula extra no final, se houver
+			camposRepetidos = strings.TrimSuffix(camposRepetidos, ", ")
 
+			return camposRepetidos, err
 		}
-		return camposRepetidos, err
+		return "", err
 	}
 
 	// Se esta tudo ok, retorna
