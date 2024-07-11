@@ -5,15 +5,19 @@ import (
 	modelUsuario "projeto404/src/Api/Models/ModelUsers"
 )
 
-func DeletarUsuario(usuarioStruct modelUsuario.UsuarioStruct, id int) (string, error) {
+func VerificarSoftdelete(email string) (bool, error) {
 	database := db.ConectaDB() // Abre a conexão com o banco de dados
 	defer db.FechaDB(database) // Fecha conexão com o banco de dados no final da função
 
-	if err := database.
-		Delete(&usuarioStruct, id).
-		Error; err != nil {
-		return "Erro ao excluir o usuário:", err
+	var resultado modelUsuario.UsuarioStruct
+	database.Unscoped().
+		Where("email = ?", email).
+		First(&resultado)
+
+	if resultado.DeletedAt.Valid {
+		return true, nil
 	} else {
-		return "Usuario excluido com sucesso", nil
+		return false, nil
 	}
+
 }

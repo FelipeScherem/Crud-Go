@@ -13,7 +13,9 @@ func CriarUsuario(usuarioStruct modelUsuario.UsuarioStruct) (string, error) {
 	defer db.FechaDB(database) // Fecha conexão com o banco de dados no final da função
 
 	// Tenta fazer a inserção, se houver dados repetidos, ele retorna com os campos repetidos
-	if err := database.Create(&usuarioStruct).Error; err != nil {
+	if err := database.
+		Create(&usuarioStruct).
+		Error; err != nil {
 
 		camposRepetidos := "Campos repetidos: "
 		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23505" { // 23505 É o código de erro padrão do postgresql unique_violation

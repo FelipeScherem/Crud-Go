@@ -5,7 +5,6 @@ import (
 	"net/http"
 	modelUsuario "projeto404/src/Api/Models/ModelUsers"
 	repositoryUsuarios "projeto404/src/Api/Repositorys/RepositorysUsuarios"
-	util "projeto404/src/Api/Uteis"
 	"strconv"
 	"strings"
 )
@@ -14,47 +13,45 @@ import (
 func AtualizarUsuarios(c *gin.Context) {
 	var usuarioRequest AtualizarUsuarioRequest
 
-	idDoUsuarioStr := c.Param("id") // Busca o ID do usuario para atualizar
-
+	// Recupera o id do usario do entpoint
+	idDoUsuarioStr := c.Param("id")
 	idDoUsuario, err := strconv.Atoi(idDoUsuarioStr) // Converte para INT
 	// Verifica se houve erro na conversão
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"mensagem": "ID inválido"})
+		c.JSON(http.StatusBadRequest, gin.H{"mensagem": "ID inválido", "erro": err})
 		return
 	}
 
 	// Bind JSON request body para UsuarioRequest
-	if err := c.ShouldBindJSON(&usuarioRequest); err != nil {
+	if err = c.ShouldBindJSON(&usuarioRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"mensagem": "Erro ao processar requisição JSON", "erro": err})
 		return
 	}
 
 	// ############## VALIDAÇÕES ##############
-	// Chama a função de validações da senha
-	if usuarioRequest.NovaSenha != "" {
-		// Validar se a senha antiga está correta
-		validarSenha, err := repositoryUsuarios.ValidarSenha(idDoUsuario, usuarioRequest.Senha)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"erro": err})
-			return
-		} else if validarSenha {
 
-		}
-
-		mensagem, statusSenha := util.ValidarSenha(usuarioRequest.Senha)
-		if !statusSenha {
-			c.JSON(http.StatusBadRequest, gin.H{"mensagem": mensagem})
-			return
-		}
+	// Valida se a senha esta correta para fazer as atualizações
+	validarSenha, err := repositoryUsuarios.ValidarSenha(idDoUsuario, usuarioRequest.Senha)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": err})
+		return
 	}
-	// ############## VALIDAÇÕES ##############
+	if !validarSenha {
+		c.JSON(http.StatusBadRequest, gin.H{"mensagem": "Senha não confere"})
+		return
+	}
+
+	// Se uma nova senha informada, entra na validação
+	if usuarioRequest.NovaSenha != "" {
+		usuarioRequest.Senha = usuarioRequest.NovaSenha
+	}
 
 	// Popula os dados da struct de inserção
 	usuarioModel := modelUsuario.UsuarioStruct{
 		Nome:                     usuarioRequest.Nome,
 		Email:                    usuarioRequest.Email,
 		Telefone:                 usuarioRequest.Telefone,
-		Senha:                    usuarioRequest.NovaSenha,
+		Senha:                    usuarioRequest.Senha,
 		Foto:                     usuarioRequest.Foto,
 		CidadeDeAtuacao:          usuarioRequest.CidadeDeAtuacao,
 		ServicosPrestados:        strings.Join(usuarioRequest.ServicosPrestados, ", "),

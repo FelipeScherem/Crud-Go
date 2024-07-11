@@ -29,6 +29,18 @@ func CriarUsuarios(c *gin.Context) {
 	}
 
 	// ############## VALIDAÇÕES ##############
+
+	// Valida de email pertence a softdelete
+	var usuarioDeletado bool
+	usuarioDeletado, err := repositoryUsuarios.VerificarSoftdelete(usuarioRequest.Email)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": err})
+		return
+	} else if usuarioDeletado {
+		c.JSON(http.StatusBadRequest, gin.H{"mensagem": "Email já cadastrado, deseja reativar seu usuario?"})
+		return
+	}
+
 	// Chama a função de validações da senha
 	mensagem, statusSenha := util.ValidarSenha(usuarioRequest.Senha)
 	if !statusSenha {
@@ -53,15 +65,16 @@ func CriarUsuarios(c *gin.Context) {
 	}
 	// ############## VALIDAÇÕES ##############
 
+	var razaoSocial, nomeFantasia string
 	// Busca dados do CNPJ
 	if usuarioRequest.CNPJ != "" {
+		razaoSocial, nomeFantasia, err, mensagem = serviceUsuarios.ConsultarDadosCNPJ(usuarioRequest.CNPJ)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"mensagem": mensagem, "erro": err})
+			return
+		}
 	}
 
-	razaoSocial, nomeFantasia, err, mensagem := serviceUsuarios.ConsultarDadosCNPJ(usuarioRequest.CNPJ)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"mensagem": mensagem, "erro": err})
-		return
-	}
 	// Popula os dados da struct de inserção
 	usuarioModel := modelUsuario.UsuarioStruct{
 		Nome:                     usuarioRequest.Nome,
